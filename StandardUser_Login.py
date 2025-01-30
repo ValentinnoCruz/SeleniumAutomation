@@ -44,6 +44,48 @@ class TestUserLogin:
 
         time.sleep(2)  # Optional delay for UI checks
 
+class TestPasswordToggle:
+    def test_password_toggle(self, driver, request):
+        """Test password toggle functionality in a single test while capturing multiple screenshots."""
+
+        driver.get("https://sprout-qa-2-wioqjc6rsa-wl.a.run.app/#/login")
+        wait = WebDriverWait(driver, 10)
+
+        password_input = wait.until(EC.presence_of_element_located((By.ID, "current-password")))
+        password_input.send_keys("Canon1234")  # Ensure password is entered
+
+        toggle_button = driver.find_element(By.XPATH, "//label[@for='show-pw']")
+
+        # Initialize screenshot storage
+        request.node.screenshot_paths = []
+
+        # Step 1: Verify password is initially hidden
+        assert password_input.get_attribute("type") == "password", "Password should initially be hidden"
+        screenshot1 = "screenshots/password_initially_hidden.png"
+        driver.save_screenshot(screenshot1)
+        request.node.screenshot_paths.append(screenshot1)  # Store screenshot path
+        print(f"✅ Screenshot saved: {screenshot1}")
+
+        # Step 2: Click toggle to show password
+        toggle_button.click()
+        time.sleep(1)  # Allow UI to update
+        assert password_input.get_attribute("type") == "text", "Password should be visible after toggle"
+        screenshot2 = "screenshots/password_visible.png"
+        driver.save_screenshot(screenshot2)
+        request.node.screenshot_paths.append(screenshot2)  # Store screenshot path
+        print(f"✅ Screenshot saved: {screenshot2}")
+
+        # Step 3: Click toggle again to hide password
+        toggle_button.click()
+        time.sleep(1)
+        assert password_input.get_attribute("type") == "password", "Password should be hidden after toggling back"
+        screenshot3 = "screenshots/password_hidden_again.png"
+        driver.save_screenshot(screenshot3)
+        request.node.screenshot_paths.append(screenshot3)  # Store screenshot path
+        print(f"✅ Screenshot saved: {screenshot3}")
+
+        print("🎉 Test Passed: Password visibility toggle works correctly!")
+
 
 
 # ------- old working with original conftest.py -------

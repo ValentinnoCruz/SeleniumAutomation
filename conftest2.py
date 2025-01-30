@@ -1,73 +1,146 @@
+
 import pytest
 import os
+import time
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
-from datetime import datetime
-from pathlib import Path
+from pytest_html import extras
 
-# Global driver reference
-driver = None
-
-# Define base directory for reports & screenshots
-REPORT_DIR = Path("Reports", datetime.now().strftime("%Y%m%d_%H%M%S"))
-SCREENSHOT_DIR = REPORT_DIR / "screenshots"
-
-@pytest.fixture(scope="class", autouse=True)
-def browser(request):
-    global driver
-    chrome_options = Options()
-    chrome_options.add_experimental_option("detach", True)
-    
-    # Initialize the WebDriver
-    driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
-        options=chrome_options
-    )
-    request.cls.driver = driver  # Make driver available to test classes
-    yield
+@pytest.fixture
+def driver():
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    yield driver
     driver.quit()
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
-    pytest_html = item.config.pluginmanager.getplugin('html')
+    """
+    Hook to attach multiple screenshots to the HTML report for each test.
+    """
     outcome = yield
-    report = outcome.get_result()
-    extra = getattr(report, 'extra', [])
+    result = outcome.get_result()
+
+    if result.when == "call":
+        if hasattr(item, "screenshot_paths"):
+            extra = getattr(result, "extra", [])
+            for screenshot in item.screenshot_paths:
+                extra.append(extras.png(screenshot))
+            result.extra = extra
+
+
+# ----------------- Pytest HTML Report Working  -----------------
+
+# import pytest
+# import os
+# import time
+# from selenium import webdriver
+# from selenium.webdriver.chrome.service import Service
+# from webdriver_manager.chrome import ChromeDriverManager
+# from pytest_html import extras
+
+# @pytest.fixture
+# def driver():
+#     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+#     yield driver
+#     driver.quit()
+
+# @pytest.hookimpl(hookwrapper=True)
+# def pytest_runtest_makereport(item, call):
+#     """
+#     Hook to attach screenshots to the HTML report for pass or fail.
+#     """
+#     outcome = yield
+#     result = outcome.get_result()
+
+#     if result.when == "call":
+#         # if you only want screenshots for failures, check result.failed
+#         if result.failed or result.passed:
+#             driver = item.funcargs.get("driver", None)
+#             if driver is not None:
+#                 screenshot_dir = "screenshots"
+#                 os.makedirs(screenshot_dir, exist_ok=True)
+#                 file_name = f"{item.name}_{int(time.time())}.png"
+#                 file_path = os.path.join(screenshot_dir, file_name)
+#                 driver.save_screenshot(file_path)
+
+#                 # Attach to HTML report
+#                 extra = getattr(result, "extra", [])
+#                 extra.append(extras.png(file_path))
+#                 result.extra = extra
+
+
+
+# import pytest
+# import os
+# from selenium import webdriver
+# from selenium.webdriver.chrome.service import Service
+# from webdriver_manager.chrome import ChromeDriverManager
+# from selenium.webdriver.chrome.options import Options
+# from datetime import datetime
+# from pathlib import Path
+
+# # Global driver reference
+# driver = None
+
+# # Define base directory for reports & screenshots
+# REPORT_DIR = Path("Reports", datetime.now().strftime("%Y%m%d_%H%M%S"))
+# SCREENSHOT_DIR = REPORT_DIR / "screenshots"
+
+# @pytest.fixture(scope="class", autouse=True)
+# def browser(request):
+#     global driver
+#     chrome_options = Options()
+#     chrome_options.add_experimental_option("detach", True)
     
-    if report.when in ['call', 'setup']:
-        xfail = hasattr(report, 'wasxfail')
-        if (report.skipped and xfail) or (report.failed and not xfail):
-            # Create screenshot directory if needed
-            SCREENSHOT_DIR.mkdir(parents=True, exist_ok=True)
+#     # Initialize the WebDriver
+#     driver = webdriver.Chrome(
+#         service=Service(ChromeDriverManager().install()),
+#         options=chrome_options
+#     )
+#     request.cls.driver = driver  # Make driver available to test classes
+#     yield
+#     driver.quit()
+
+# @pytest.hookimpl(hookwrapper=True)
+# def pytest_runtest_makereport(item, call):
+#     pytest_html = item.config.pluginmanager.getplugin('html')
+#     outcome = yield
+#     report = outcome.get_result()
+#     extra = getattr(report, 'extra', [])
+    
+#     if report.when in ['call', 'setup']:
+#         xfail = hasattr(report, 'wasxfail')
+#         if (report.skipped and xfail) or (report.failed and not xfail):
+#             # Create screenshot directory if needed
+#             SCREENSHOT_DIR.mkdir(parents=True, exist_ok=True)
             
-            # Capture screenshot
-            screenshot_path = SCREENSHOT_DIR / f"{report.nodeid.replace('::', '_')}.png"
-            driver.save_screenshot(str(screenshot_path))
+#             # Capture screenshot
+#             screenshot_path = SCREENSHOT_DIR / f"{report.nodeid.replace('::', '_')}.png"
+#             driver.save_screenshot(str(screenshot_path))
             
-            # Embed in report
-            if pytest_html:
-                # Use relative path for HTML report compatibility
-                relative_path = os.path.relpath(
-                    screenshot_path, 
-                    start=REPORT_DIR
-                )
-                extra.append(pytest_html.extras.image(relative_path))
+#             # Embed in report
+#             if pytest_html:
+#                 # Use relative path for HTML report compatibility
+#                 relative_path = os.path.relpath(
+#                     screenshot_path, 
+#                     start=REPORT_DIR
+#                 )
+#                 extra.append(pytest_html.extras.image(relative_path))
                 
-        report.extra = extra
+#         report.extra = extra
 
-@pytest.hookimpl(tryfirst=True)
-def pytest_configure(config):
-    """Set up the report directory and filename"""
-    REPORT_DIR.mkdir(parents=True, exist_ok=True)
-    pytest_html = REPORT_DIR / "report.html"
+# @pytest.hookimpl(tryfirst=True)
+# def pytest_configure(config):
+#     """Set up the report directory and filename"""
+#     REPORT_DIR.mkdir(parents=True, exist_ok=True)
+#     pytest_html = REPORT_DIR / "report.html"
     
-    config.option.htmlpath = str(pytest_html)
-    config.option.self_contained_html = True  # Critical for embedded images
+#     config.option.htmlpath = str(pytest_html)
+#     config.option.self_contained_html = True  # Critical for embedded images
 
-def pytest_html_report_title(report):
-    report.title = "Automation Test Report"
+# def pytest_html_report_title(report):
+#     report.title = "Automation Test Report"
 
 # ------- Ver 2.0 -----------------
 
