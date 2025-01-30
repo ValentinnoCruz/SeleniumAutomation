@@ -1,3 +1,7 @@
+
+
+# ------ Currently working ------
+
 import pytest
 import time
 from selenium.webdriver.common.by import By
@@ -23,7 +27,7 @@ def test_password_toggle(driver, request):
     screenshot1 = "screenshots/password_initially_hidden.png"
     driver.save_screenshot(screenshot1)
     request.node.screenshot_paths.append(screenshot1)  # Store screenshot path
-    print(f"✅ Pssword initially Hidden: {screenshot1}")
+    print(f"✅ Password initially Hidden: {screenshot1}")
 
     # Step 2: Click toggle to show password
     toggle_button.click()

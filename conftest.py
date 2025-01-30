@@ -1,6 +1,5 @@
 
-# --------- Working v2.0 ---------
-
+# ----- Copy of v2.0 -----
 import pytest
 import os
 import time
@@ -29,6 +28,37 @@ def pytest_runtest_makereport(item, call):
             for screenshot in item.screenshot_paths:
                 extra.append(extras.png(screenshot))
             result.extra = extra
+
+# --------- Working v2.0 ---------
+
+# import pytest
+# import os
+# import time
+# from selenium import webdriver
+# from selenium.webdriver.chrome.service import Service
+# from webdriver_manager.chrome import ChromeDriverManager
+# from pytest_html import extras
+
+# @pytest.fixture
+# def driver():
+#     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+#     yield driver
+#     driver.quit()
+
+# @pytest.hookimpl(hookwrapper=True)
+# def pytest_runtest_makereport(item, call):
+#     """
+#     Hook to attach multiple screenshots to the HTML report for each test.
+#     """
+#     outcome = yield
+#     result = outcome.get_result()
+
+#     if result.when == "call":
+#         if hasattr(item, "screenshot_paths"):
+#             extra = getattr(result, "extra", [])
+#             for screenshot in item.screenshot_paths:
+#                 extra.append(extras.png(screenshot))
+#             result.extra = extra
 
 
 
