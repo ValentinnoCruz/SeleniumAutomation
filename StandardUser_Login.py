@@ -25,5 +25,16 @@ class TestUserLogin():
         # Click on the Login Button
         driver.find_element(By.XPATH, "//button[normalize-space()='SIGN IN']").click()
 
-        #Explicit wait for the "Scan Test Result" button
+        #Explicit wait for the 
+        try:
+            WebDriverWait(driver, 3).until(
+                EC.presence_of_element_located((By.XPATH, "//div[@class='user-role']"))
+            )
+            print("User logged in successfully")
+        except Exception as e:
+            assert False, "User login failed"
+
+        # Wait and close browser
+        time.sleep(2)
+        driver.quit()
 
