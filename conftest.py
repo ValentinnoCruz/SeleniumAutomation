@@ -1,3 +1,6 @@
+
+# --------- Working v2.0 ---------
+
 import pytest
 import os
 import time
@@ -26,6 +29,7 @@ def pytest_runtest_makereport(item, call):
             for screenshot in item.screenshot_paths:
                 extra.append(extras.png(screenshot))
             result.extra = extra
+
 
 
 # ----------------- Pytest HTML Report Working  -----------------
