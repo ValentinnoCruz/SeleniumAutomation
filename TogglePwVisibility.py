@@ -14,6 +14,8 @@ class TestPasswordToggle:
 
         password_input = wait.until(EC.presence_of_element_located((By.ID, "current-password")))
         assert password_input.get_attribute("type") == "password", "Password should initially be hidden"
+        password_input.send_keys("Canon1234")  # Ensure password is entered
+        
 
         screenshot_path = "screenshots/password_initially_hidden.png"
         driver.save_screenshot(screenshot_path)
