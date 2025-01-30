@@ -42,4 +42,3 @@ class TestUserLogin():
         # Wait and close browser
         time.sleep(2)
         driver.quit()
-
