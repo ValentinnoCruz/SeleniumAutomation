@@ -1,7 +1,3 @@
-
-
-# ------ Currently working ------
-
 import pytest
 import time
 from selenium.webdriver.common.by import By
@@ -27,7 +23,7 @@ def test_password_toggle(driver, request):
     screenshot1 = "screenshots/password_initially_hidden.png"
     driver.save_screenshot(screenshot1)
     request.node.screenshot_paths.append(screenshot1)  # Store screenshot path
-    print(f"✅ Password initially Hidden: {screenshot1}")
+    print(f"✅ 1. Password initially Hidden: {screenshot1}")
 
     # Step 2: Click toggle to show password
     toggle_button.click()
@@ -36,7 +32,7 @@ def test_password_toggle(driver, request):
     screenshot2 = "screenshots/password_visible.png"
     driver.save_screenshot(screenshot2)
     request.node.screenshot_paths.append(screenshot2)  # Store screenshot path
-    print(f"✅ Password visible after toggle: {screenshot2}")
+    print(f"✅ 2. Password visible after unmasking: {screenshot2}")
 
     # Step 3: Click toggle again to hide password
     toggle_button.click()
@@ -45,7 +41,7 @@ def test_password_toggle(driver, request):
     screenshot3 = "screenshots/password_hidden_again.png"
     driver.save_screenshot(screenshot3)
     request.node.screenshot_paths.append(screenshot3)  # Store screenshot path
-    print(f"✅ Password hidden after toggle: {screenshot3}")
+    print(f"✅ 3. Password hidden after masking: {screenshot3}")
 
     print("🎉 Test Passed: Password visibility toggle works correctly!")
 
